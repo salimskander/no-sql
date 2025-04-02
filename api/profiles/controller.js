@@ -3,24 +3,10 @@ const Profile = require('./model');
 // Récupérer tous les profils
 exports.getAllProfiles = async (req, res) => {
   try {
-    const { skills, localisation, name } = req.query;
-    let query = { isDeleted: false };
-    
-    if (skills) {
-      query.skills = { $in: skills.split(',') };
-    }
-    
-    if (localisation) {
-      query['information.localisation'] = { $regex: localisation, $options: 'i' };
-    }
-    
-    if (name) {
-      query.name = { $regex: name, $options: 'i' };
-    }
-    
-    const profiles = await Profile.find(query);
+    const profiles = await Profile.find({ isDeleted: false });
     res.json(profiles);
   } catch (err) {
+    console.error('Erreur lors de la récupération des profils:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -28,29 +14,29 @@ exports.getAllProfiles = async (req, res) => {
 // Récupérer un profil par ID
 exports.getProfileById = async (req, res) => {
   try {
-    const profile = await Profile.findOne({ _id: req.params.id, isDeleted: false })
-      .populate('friends', 'name email _id');
-    
+    const profile = await Profile.findOne({ _id: req.params.id, isDeleted: false });
     if (!profile) {
       return res.status(404).json({ message: 'Profil non trouvé' });
     }
     res.json(profile);
   } catch (err) {
+    console.error('Erreur lors de la récupération du profil:', err);
     res.status(500).json({ message: err.message });
   }
 };
 
 // Créer un nouveau profil
 exports.createProfile = async (req, res) => {
-  const profile = new Profile({
-    name: req.body.name,
-    email: req.body.email
-  });
-
   try {
+    const profile = new Profile({
+      name: req.body.name,
+      email: req.body.email,
+      information: req.body.information || {}
+    });
     const newProfile = await profile.save();
     res.status(201).json(newProfile);
   } catch (err) {
+    console.error('Erreur lors de la création du profil:', err);
     res.status(400).json({ message: err.message });
   }
 };
@@ -62,13 +48,20 @@ exports.updateProfile = async (req, res) => {
     if (!profile) {
       return res.status(404).json({ message: 'Profil non trouvé' });
     }
-
+    
     if (req.body.name) profile.name = req.body.name;
     if (req.body.email) profile.email = req.body.email;
-
+    if (req.body.information) {
+      profile.information = {
+        ...profile.information,
+        ...req.body.information
+      };
+    }
+    
     const updatedProfile = await profile.save();
     res.json(updatedProfile);
   } catch (err) {
+    console.error('Erreur lors de la mise à jour du profil:', err);
     res.status(400).json({ message: err.message });
   }
 };
@@ -85,6 +78,7 @@ exports.deleteProfile = async (req, res) => {
     await profile.save();
     res.json({ message: 'Profil supprimé avec succès' });
   } catch (err) {
+    console.error('Erreur lors de la suppression du profil:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -107,6 +101,7 @@ exports.addExperience = async (req, res) => {
     const updatedProfile = await profile.save();
     res.status(201).json(updatedProfile);
   } catch (err) {
+    console.error('Erreur lors de l\'ajout de l\'expérience:', err);
     res.status(400).json({ message: err.message });
   }
 };
@@ -128,6 +123,7 @@ exports.deleteExperience = async (req, res) => {
     const updatedProfile = await profile.save();
     res.json(updatedProfile);
   } catch (err) {
+    console.error('Erreur lors de la suppression de l\'expérience:', err);
     res.status(400).json({ message: err.message });
   }
 };
@@ -146,14 +142,15 @@ exports.addSkill = async (req, res) => {
     }
 
     const updatedProfile = await profile.save();
-    res.status(201).json(updatedProfile);
+    res.json(updatedProfile);
   } catch (err) {
+    console.error('Erreur lors de l\'ajout de la compétence:', err);
     res.status(400).json({ message: err.message });
   }
 };
 
 // Supprimer une compétence
-exports.deleteSkill = async (req, res) => {
+exports.removeSkill = async (req, res) => {
   try {
     const profile = await Profile.findOne({ _id: req.params.id, isDeleted: false });
     if (!profile) {
@@ -169,6 +166,7 @@ exports.deleteSkill = async (req, res) => {
     const updatedProfile = await profile.save();
     res.json(updatedProfile);
   } catch (err) {
+    console.error('Erreur lors de la suppression de la compétence:', err);
     res.status(400).json({ message: err.message });
   }
 };
@@ -255,27 +253,29 @@ exports.getFriends = async (req, res) => {
   }
 };
 
-// Rechercher des profils avec filtres
+// Rechercher des profils
 exports.searchProfiles = async (req, res) => {
   try {
     const { skills, localisation, name } = req.query;
     let query = { isDeleted: false };
-    
-    if (skills) {
-      query.skills = { $in: skills.split(',') };
-    }
-    
-    if (localisation) {
-      query['information.localisation'] = { $regex: localisation, $options: 'i' };
-    }
-    
+
     if (name) {
       query.name = { $regex: name, $options: 'i' };
     }
-    
+
+    if (localisation) {
+      query['information.localisation'] = { $regex: localisation, $options: 'i' };
+    }
+
+    if (skills) {
+      const skillsArray = skills.split(',').map(skill => skill.trim());
+      query.skills = { $in: skillsArray };
+    }
+
     const profiles = await Profile.find(query);
     res.json(profiles);
   } catch (err) {
+    console.error('Erreur lors de la recherche de profils:', err);
     res.status(500).json({ message: err.message });
   }
 }; 

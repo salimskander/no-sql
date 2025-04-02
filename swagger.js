@@ -1,4 +1,4 @@
-const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
 const options = {
@@ -7,7 +7,7 @@ const options = {
     info: {
       title: 'API de Gestion de Profils',
       version: '1.0.0',
-      description: 'Une API RESTful pour gérer des profils utilisateurs avec leurs expériences, compétences et relations',
+      description: 'API RESTful pour gérer des profils utilisateurs avec leurs expériences, compétences et relations',
       contact: {
         name: 'Support API',
         email: 'support@api-profiles.com'
@@ -121,6 +121,11 @@ const options = {
   apis: ['./api/profiles/index.js', './routes.js']
 };
 
-const specs = swaggerJsdoc(options);
+const specs = swaggerJsDoc(options);
 
-module.exports = { swaggerUi, specs }; 
+module.exports = function(app) {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customCssUrl: '/assets/swagger-custom.css'
+  }));
+}; 

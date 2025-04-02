@@ -14,6 +14,12 @@ services:
       - .:/app
       - /app/node_modules
     restart: unless-stopped
+    command: >
+      sh -c "
+        echo 'Attente de MongoDB...' &&
+        sleep 15 &&
+        node index.js
+      "
 
   mongo:
     image: mongo:latest
@@ -26,6 +32,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     restart: unless-stopped
+    command: mongod --wiredTigerCacheSizeGB 1.0 --bind_ip_all
 
 volumes:
   mongo_data: 

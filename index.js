@@ -2,47 +2,51 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
-
+const dotenv = require('dotenv');
+const swaggerSetup = require('./swagger');
 const routes = require('./routes');
-const { swaggerUi, specs } = require('./swagger');
+
+// Configuration des variables d'environnement
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://root:example@mongo:27017/profilesdb?authSource=admin';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Documentation Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
-  explorer: true,
-  customCss: '.swagger-ui .topbar { display: none }',
-  customCssUrl: '/assets/swagger-custom.css',
-  customSiteTitle: "API de Gestion de Profils",
-  customfavIcon: "/assets/favicon.ico"
-}));
-
-// Routes
-app.use('/', routes);
-
-// Connexion à MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connexion à MongoDB réussie'))
-  .catch(err => console.error('Erreur de connexion à MongoDB:', err));
-
-// Gestion des erreurs
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Une erreur est survenue sur le serveur' });
-});
-
-// Démarrage du serveur
-app.listen(PORT, () => {
-  console.log(`Serveur en cours d'exécution sur le port ${PORT}`);
-  console.log(`Documentation disponible sur http://localhost:${PORT}/api-docs`);
+// Connexion à MongoDB avec options améliorées
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 45000,
+})
+.then(() => {
+  console.log('Connexion à MongoDB établie avec succès');
+  
+  // Configuration de Swagger (après connexion réussie à MongoDB)
+  swaggerSetup(app);
+  
+  // Routes API
+  app.use('/', routes);
+  
+  // Route pour la page d'accueil
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+  
+  // Démarrage du serveur
+  app.listen(PORT, () => {
+    console.log(`Serveur en cours d'exécution sur le port ${PORT}`);
+    console.log(`Documentation disponible sur http://localhost:${PORT}/api-docs`);
+  });
+})
+.catch(err => {
+  console.error('Erreur de connexion à MongoDB:', err.message);
 });
 
 module.exports = app; 

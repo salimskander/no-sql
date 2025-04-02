@@ -57,7 +57,7 @@ Pour lancer le serveur en mode production :
 npm start
 ```
 
-Méthode 2 : Avec Docker Compose
+Méthode 2 : Avec Docker Compose (conseillée)
 ----
 Pour lancer l'application et la base de données MongoDB dans des conteneurs Docker :
 ```

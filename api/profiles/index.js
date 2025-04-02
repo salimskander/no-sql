@@ -85,6 +85,15 @@ router.get('/:id', profileController.getProfileById);
  *                 type: string
  *               email:
  *                 type: string
+ *               information:
+ *                 type: object
+ *                 properties:
+ *                   bio:
+ *                     type: string
+ *                   localisation:
+ *                     type: string
+ *                   siteWeb:
+ *                     type: string
  *     responses:
  *       201:
  *         description: Profil créé avec succès
@@ -117,6 +126,15 @@ router.post('/', profileController.createProfile);
  *                 type: string
  *               email:
  *                 type: string
+ *               information:
+ *                 type: object
+ *                 properties:
+ *                   bio:
+ *                     type: string
+ *                   localisation:
+ *                     type: string
+ *                   siteWeb:
+ *                     type: string
  *     responses:
  *       200:
  *         description: Profil mis à jour avec succès
@@ -131,7 +149,7 @@ router.put('/:id', profileController.updateProfile);
  * @swagger
  * /profiles/{id}:
  *   delete:
- *     summary: Supprimer un profil (soft delete)
+ *     summary: Supprimer un profil
  *     tags: [Profiles]
  *     parameters:
  *       - in: path
@@ -145,8 +163,6 @@ router.put('/:id', profileController.updateProfile);
  *         description: Profil supprimé avec succès
  *       404:
  *         description: Profil non trouvé
- *       500:
- *         description: Erreur serveur
  */
 router.delete('/:id', profileController.deleteProfile);
 
@@ -215,8 +231,6 @@ router.post('/:id/experience', profileController.addExperience);
  *         description: Expérience supprimée avec succès
  *       404:
  *         description: Profil ou expérience non trouvé
- *       400:
- *         description: Données invalides
  */
 router.delete('/:id/experience/:exp', profileController.deleteExperience);
 
@@ -245,12 +259,10 @@ router.delete('/:id/experience/:exp', profileController.deleteExperience);
  *               skill:
  *                 type: string
  *     responses:
- *       201:
+ *       200:
  *         description: Compétence ajoutée avec succès
  *       404:
  *         description: Profil non trouvé
- *       400:
- *         description: Données invalides
  */
 router.post('/:id/skills', profileController.addSkill);
 
@@ -278,10 +290,8 @@ router.post('/:id/skills', profileController.addSkill);
  *         description: Compétence supprimée avec succès
  *       404:
  *         description: Profil ou compétence non trouvé
- *       400:
- *         description: Données invalides
  */
-router.delete('/:id/skills/:skill', profileController.deleteSkill);
+router.delete('/:id/skills/:skill', profileController.removeSkill);
 
 /**
  * @swagger
