@@ -29,7 +29,7 @@ const profileSchema = new mongoose.Schema({
   },
   experience: [experienceSchema],
   skills: [String],
-  information: {
+  information: { 
     bio: String,
     localisation: String,
     siteWeb: String
