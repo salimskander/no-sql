@@ -77,6 +77,7 @@ docker-compose down
 Une fois le serveur démarré, vous pouvez accéder à :
 
 Interface principale : [interface de base](http://localhost:3000)
+
 Documentation Swagger : [swagger](http://localhost:3000/api-docs)
 
 La documentation Swagger vous permet de tester tous les endpoints directement depuis votre navigateur.
